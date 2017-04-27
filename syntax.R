@@ -10,18 +10,8 @@ packages <- c(
 )
 
 get_functions <- function(pkg) {
-    objs <- getNamespaceExports(asNamespace(pkg))
-    objs <- objs[str_detect(objs, "^[a-zA-Z\\._][0-9a-zA-Z\\._]*$")]
-    out <- c()
-    for (obj in objs){
-        try({
-            if (eval(parse(text = paste0("is.function(", pkg, "::", obj, ")")))){
-                out <- c(out, obj)
-            }
-        },
-        silent = TRUE)
-    }
-    out
+    objs <- unclass(lsf.str(envir = asNamespace(pkg)))
+    objs[str_detect(objs, "^[a-zA-Z\\._][0-9a-zA-Z\\._]*$")]
 }
 
 template <- "
@@ -43,6 +33,6 @@ for (pkg in packages){
 
 syntax_file <- "syntax/R Extended.sublime-syntax"
 content <- readChar(syntax_file, file.info(syntax_file)$size)
-begin_pt <- str_locate(content, "builtins-functions:\n")[2]
+begin_pt <- str_locate(content, "builtin-functions:\n")[2]
 str_sub(content, begin_pt, str_length(content)) <- dict
 cat(content, file = syntax_file)
